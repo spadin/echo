@@ -9,6 +9,18 @@ describe Echo::App do
       _, headers, _ = app.call(create_rack_env)
       expect(headers['Content-Type']).to eq('application/json')
     end
+
+    it 'returns a location of http://google.com' do
+       env = create_rack_env('/301', params: 'header={"Location":"http://google.com"}')
+       _, headers, _ = app.call(env)
+       expect(headers['Location']).to eq('http://google.com')
+    end
+
+    it 'returns empty headers if status code is 304' do
+       env = create_rack_env('/304')
+       _, headers, _ = app.call(env)
+       expect(headers).to eq({})
+    end
   end
 
   context 'body' do

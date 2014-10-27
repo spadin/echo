@@ -13,7 +13,33 @@ module Echo
     attr_reader :env
 
     def header
-      {'Content-Type' => 'application/json'}
+       if not_modified_status_code?
+          {}
+       elsif headers_from_params?
+          parsed_headers_from_params
+       else
+          json_content_type_header
+       end
+    end
+
+    def json_content_type_header
+       {'Content-Type' => 'application/json'}
+    end
+
+    def parsed_headers_from_params
+       JSON.parse(headers_from_params)
+    end
+
+    def headers_from_params
+       params['header'] || '{}'
+    end
+
+    def headers_from_params?
+       !params['header'].nil?
+    end
+
+    def not_modified_status_code?
+       status_code == 304
     end
 
     def status_code
@@ -32,8 +58,12 @@ module Echo
       [json_params]
     end
 
+    def params
+       request.params
+    end
+
     def json_params
-      request.params.to_json
+      params.to_json
     end
 
     def request
